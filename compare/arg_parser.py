@@ -8,13 +8,7 @@ def create_parser():
         description='Configure parts into components and perform comparisons',
         epilog='Compare it!')
 
-    parser.add_argument('-d', '--detail',
-                           action='store',
-                           type=str,
-                           required=False,
-                           help='modifies something')
-    
-    parser.add_argument("-c", "--component",
+    parser.add_argument("-c", "--components",
                         metavar="KEY=VALUE",
                         action='append',
                         nargs='+',
