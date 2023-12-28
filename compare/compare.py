@@ -20,9 +20,9 @@ class Compare():
     }
 
     def __init__(self, parser, options):
-        self.valid_commands = [
-            'prices'
-        ]
+        self.valid_commands = {
+            'price': self._run_price_comparison
+        }
 
         self.valid_flags = [
             'components'
@@ -38,13 +38,14 @@ class Compare():
         self.result_payload = []
         self._validate_command()
         self._validate_and_load_attributes()
+        self.valid_commands[self.command]()
 
     def __repr__(self):
         return (
             f'command: {self.command}\n'
             f'options: {self.options}\n'
             f'payload: {self.payload}\n'
-            f'payload: {self.result_payload}\n'
+            f'resultP: {self.result_payload}\n'
         )
     
     def __str__(self):
@@ -105,12 +106,12 @@ class Compare():
         for index, component in enumerate(payload):
             total_price = sum(value for key, value in component.items() if key not in Compare.valid_attribute_types)
             result.append({
-                "name": component.get("name") or index,
+                "name": component.get("name") or f"Component {index+1}",
                 "description": component.get("description") or "N/A",
                 "total_price": total_price
                 })
         return sorted(result, key=lambda x: x["total_price"])
 
-    def run_price_comparison(self):
+    def _run_price_comparison(self):
         self.result_payload = self.compare_by_price(self.payload)
         return self.result_payload

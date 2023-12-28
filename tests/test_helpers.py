@@ -2,7 +2,65 @@ from pprint import pprint
 from faker import Faker
 import random
 
-def get_typical_payload_and_result():
+def get_basic_command():
+    fake = Faker()
+
+    return [
+        'price',
+        '-c',
+            f'name={fake.word()}',
+            f'partA={round(random.uniform(10, 50), 2)}',
+            f'partB={round(random.uniform(10, 50), 2)}',
+            f'p={round(random.uniform(100, 150), 2)}',
+            f'qt={random.randint(1, 10)}',
+            f'desc={fake.sentence()}',
+            f'priority={round(random.uniform(1, 10), 2)}',
+        '-c',
+            f'n={fake.word()}',
+            f'partA={round(random.uniform(10, 50), 2)}',
+            f'partB={round(random.uniform(10, 50), 2)}',
+            f'dist={round(random.uniform(10, 50), 2)}',
+            f't={round(random.uniform(100, 500), 2)}',
+            f'wt={round(random.uniform(100, 500), 2)}',
+        '-c',
+            f'name={fake.word()}',
+            f'desc={fake.word()}',
+            f'partA={round(random.uniform(10, 50), 2)}',
+            f'partB={round(random.uniform(10, 50), 2)}',
+            f'sp={round(random.uniform(100, 500), 2)}'
+    ]
+
+def get_typical_command_and_price_comparison_result():
+    command = get_basic_command()
+    result = [
+        {
+            'name': command[2].split('=')[1],
+            'total_price': sum([
+                float(command[3].split('=')[1]),
+                float(command[4].split('=')[1]),
+            ]),            
+            'description': command[7].split('=')[1],
+        },
+        {
+            'name': command[10].split('=')[1],
+            'total_price': sum([
+                float(command[11].split('=')[1]),
+                float(command[12].split('=')[1]),
+            ]),            
+            'description': 'N/A',
+        },
+        {
+            'name': command[17].split('=')[1],
+            'total_price': sum([
+                float(command[19].split('=')[1]),
+                float(command[20].split('=')[1]),
+            ]),
+            'description': command[18].split('=')[1],
+        }
+    ]
+    return command, sorted(result, key=lambda x: x['total_price'])
+    
+def get_typical_payload_and_price_comparison_result():
     fake = Faker()
 
     payload = [
@@ -67,39 +125,14 @@ def get_typical_payload_and_result():
                 payload[2]['ssd1'],
                 payload[2]['ssd2'],
                 payload[2]['ssd3'],
-            ])            
+            ])
         }
     ]
 
     return payload, sorted(result_payload, key=lambda x: x["total_price"])
 
 def get_typical_command_and_payload():
-    fake = Faker()
-
-    basic_command = [
-        'prices', 
-        '-c', 
-            f'name={fake.word()}', 
-            f'partA={round(random.uniform(10, 50), 2)}', 
-            f'partB={round(random.uniform(10, 50), 2)}',
-            f'p={round(random.uniform(100, 150), 2)}',
-            f'qt={random.randint(1, 10)}', 
-            f'desc={fake.sentence()}',
-            f'priority={round(random.uniform(1, 10), 2)}',
-        '-c', 
-            f'n={fake.word()}',
-            f'partA={round(random.uniform(10, 50), 2)}',
-            f'partB={round(random.uniform(10, 50), 2)}',
-            f'dist={round(random.uniform(10, 50), 2)}',
-            f't={round(random.uniform(100, 500), 2)}',
-            f'wt={round(random.uniform(100, 500), 2)}',
-        '-c', 
-            f'name={fake.word()}',
-            f'desc={fake.word()}', 
-            f'partA={round(random.uniform(10, 50), 2)}',
-            f'partB={round(random.uniform(10, 50), 2)}',
-            f'sp={round(random.uniform(100, 500), 2)}'
-    ]
+    basic_command = get_basic_command()
 
     basic_payload = [
         {'name': basic_command[2].split('=')[1], 
@@ -131,5 +164,8 @@ if __name__ == '__main__':
     #basic_command, basic_payload = get_typical_command_and_payload()
     #pprint(basic_command)
     #pprint(basic_payload)
-    payload, result = get_typical_payload_and_result()
+    #payload, result = get_typical_payload_and_price_comparison_result()
+    #pprint(result)
+    command, result = get_typical_command_and_price_comparison_result()
+    pprint(command)
     pprint(result)

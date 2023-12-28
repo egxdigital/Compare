@@ -13,7 +13,7 @@ from compare.config import *
 from compare.helpers import *
 from compare.compare import Compare
 from compare.arg_parser import create_parser
-from tests.test_helpers import get_typical_command_and_payload, get_typical_payload_and_result
+from tests.test_helpers import get_typical_command_and_payload, get_typical_payload_and_price_comparison_result, get_typical_command_and_price_comparison_result
 
 @pytest.fixture
 def compare_parser():
@@ -58,14 +58,16 @@ def test_compare_for_interpreting_component_attribute_value_types(compare_parser
             else:
                 attr_type = compare.valid_attribute_types.get(attr_name)
                 if attr_type == 'float':
-                    assert type(attr_value) == float, f"'{attr_name}' should be float"
+                    assert type(attr_value) == float, f"'{attr_name}' should be type float"
                 if attr_type == 'string':
-                    assert type(attr_value) == str, f"'{attr_name}' should be str"
+                    assert type(attr_value) == str, f"'{attr_name}' should be type str"
 
 def test_class_method_compare_by_price() -> None:
-    payload, expected_result = get_typical_payload_and_result()
+    payload, expected_result = get_typical_payload_and_price_comparison_result()
     result = Compare.compare_by_price(payload)
-    assert expected_result == result
+    assert expected_result == result, "Should return a list of components sorted in ascending order by price"
 
 def test_instance_method_run_price_comparison(compare_parser: argparse.ArgumentParser) -> None:
-    pass
+    command, expected_result = get_typical_command_and_price_comparison_result()
+    compare = run_command(compare_parser, command)
+    assert expected_result == compare.result_payload
