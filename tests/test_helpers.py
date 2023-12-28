@@ -2,6 +2,77 @@ from pprint import pprint
 from faker import Faker
 import random
 
+def get_random_payload_and_result():
+    fake = Faker()
+
+    payload = [
+        {
+            'name': 'Server Workstation #1',
+            'description': "High performance workstation for running VM's",
+            'motherboard': 340.99,
+            'memory': 149.99,
+            'cpu': 120.42,
+            'gpu': 299.99,
+            'priority': 0.5,
+            'weight': 5.0
+        },
+        {
+            'name': 'Server Workstation #2',
+            'description': "High performance workstation for running VM's",
+            'motherboard': 299.99,
+            'memory': 149.99,
+            'cpu': 120.42,
+            'gpu': 312.99,
+            'priority': 0.5,
+            'weight': 7.0
+        },
+        {
+            'name': 'Raid Setup',
+            'description': "Extend existing computer's space and upgrade other parts",
+            'memory': 100.24,
+            'ssd1': 49.99,
+            'ssd2': 49.99,
+            'ssd3': 49.99,
+            'priority': 1,
+            'weight': 4.0
+        }
+    ]
+
+    result_payload = [
+        {
+            'name': payload[0]['name'],
+            'description': payload[0]['description'],
+            'total_price': sum([
+                payload[0]['motherboard'],
+                payload[0]['memory'],
+                payload[0]['cpu'],
+                payload[0]['gpu'],
+            ])
+        },
+        {
+            'name': payload[1]['name'],
+            'description': payload[1]['description'],
+            'total_price': sum([
+                payload[1]['motherboard'],
+                payload[1]['memory'],
+                payload[1]['cpu'],
+                payload[1]['gpu'],
+            ])
+        },
+        {
+            'name': payload[2]['name'],
+            'description': payload[2]['description'],
+            'total_price': sum([
+                payload[2]['memory'],
+                payload[2]['ssd1'],
+                payload[2]['ssd2'],
+                payload[2]['ssd3'],
+            ])            
+        }
+    ]
+
+    return payload, sorted(result_payload, key=lambda x: x["total_price"])
+
 def get_random_command_and_payload():
     fake = Faker()
 
@@ -57,6 +128,8 @@ def get_random_command_and_payload():
 
 if __name__ == '__main__':
     # Example usage:
-    basic_command, basic_payload = get_random_command_and_payload()
-    pprint(basic_command)
-    pprint(basic_payload)
+    #basic_command, basic_payload = get_random_command_and_payload()
+    #pprint(basic_command)
+    #pprint(basic_payload)
+    payload, result = get_random_payload_and_result()
+    pprint(result)
