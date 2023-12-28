@@ -13,7 +13,7 @@ from compare.config import *
 from compare.helpers import *
 from compare.compare import Compare
 from compare.arg_parser import create_parser
-from tests.test_helpers import get_random_command_and_payload, get_random_payload_and_result
+from tests.test_helpers import get_typical_command_and_payload, get_typical_payload_and_result
 
 @pytest.fixture
 def compare_parser():
@@ -26,17 +26,17 @@ def run_command(parser: argparse.ArgumentParser, command: List[str]) -> Compare:
     return compare
 
 def test_compare_for_payload_size(compare_parser: argparse.ArgumentParser) -> None:
-    command, result_payload = get_random_command_and_payload()
+    command, result_payload = get_typical_command_and_payload()
     compare = run_command(compare_parser, command)
     assert len(compare.payload) == 3, "Payload size should be 3"
 
 def test_compare_for_payload_match(compare_parser: argparse.ArgumentParser) -> None:
-    command, result_payload = get_random_command_and_payload()
+    command, result_payload = get_typical_command_and_payload()
     compare = run_command(compare_parser, command)
     assert result_payload == compare.payload, "Payloads should match"
 
 def test_compare_for_handling_aliases_and_partial_attribute_names(compare_parser: argparse.ArgumentParser) -> None:
-    command, result_payload = get_random_command_and_payload()
+    command, result_payload = get_typical_command_and_payload()
     compare = run_command(compare_parser, command)
     for component in compare.payload:
         for attr in component.items():
@@ -48,7 +48,7 @@ def test_compare_for_handling_aliases_and_partial_attribute_names(compare_parser
                     assert not reserved_attr_name.startswith(attr_name), "Partial or alias reserved attribute names should be detected"
 
 def test_compare_for_interpreting_component_attribute_value_types(compare_parser: argparse.ArgumentParser) -> None:
-    command, result_payload = get_random_command_and_payload()
+    command, result_payload = get_typical_command_and_payload()
     compare = run_command(compare_parser, command)
     for component in compare.payload:
         for attr in component.items():
@@ -63,7 +63,7 @@ def test_compare_for_interpreting_component_attribute_value_types(compare_parser
                     assert type(attr_value) == str, f"'{attr_name}' should be str"
 
 def test_class_method_compare_by_price() -> None:
-    payload, expected_result = get_random_payload_and_result()
+    payload, expected_result = get_typical_payload_and_result()
     result = Compare.compare_by_price(payload)
     assert expected_result == result
 

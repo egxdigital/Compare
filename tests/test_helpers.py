@@ -2,7 +2,7 @@ from pprint import pprint
 from faker import Faker
 import random
 
-def get_random_payload_and_result():
+def get_typical_payload_and_result():
     fake = Faker()
 
     payload = [
@@ -73,7 +73,7 @@ def get_random_payload_and_result():
 
     return payload, sorted(result_payload, key=lambda x: x["total_price"])
 
-def get_random_command_and_payload():
+def get_typical_command_and_payload():
     fake = Faker()
 
     basic_command = [
@@ -128,8 +128,8 @@ def get_random_command_and_payload():
 
 if __name__ == '__main__':
     # Example usage:
-    #basic_command, basic_payload = get_random_command_and_payload()
+    #basic_command, basic_payload = get_typical_command_and_payload()
     #pprint(basic_command)
     #pprint(basic_payload)
-    payload, result = get_random_payload_and_result()
+    payload, result = get_typical_payload_and_result()
     pprint(result)
