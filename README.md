@@ -1,9 +1,9 @@
 # compare
-
-## Requirements
-- Assumes you have Python 3.10 installed and associated with the alias `python3` on your Linux system.
+A CLI application and microservice for performing complex quantitative comparisons 
 
 ## Install
+### Requirements
+Assumes you have Python 3.10 installed and associated with the alias `python3` on your Linux system.
 ### 1. Clone repository 
 Reccommended: Use `git clone` WITHOUT option `<directory>`
 ### 2. Run installation script
