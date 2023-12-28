@@ -5,51 +5,60 @@ This module contains the test case for the Compare program.
 Usage
     python -m unittest tests.test_compare
 """
-import unittest
+import pytest
 import argparse
+from typing import List
 
 from compare.config import *
 from compare.helpers import *
-from compare.compare import *
+from compare.compare import Compare
+from compare.arg_parser import create_parser
+from tests.test_helpers import get_random_command_and_payload
 
+@pytest.fixture
+def compare_parser():
+    return create_parser()
 
-class CompareTest(unittest.TestCase):
-    def setUp(self):
-        parser = argparse.ArgumentParser(
-            prog='compare',
-            fromfile_prefix_chars='@',
-            usage='compare [options] <command> <arg1>',
-            description='<desc>',
-            epilog='Build it!')
+def run_command(parser: argparse.ArgumentParser, command: List[str]) -> Compare:
+    args = parser.parse_args(command)
+    options = vars(args)
+    compare = Compare(parser, options)
+    return compare
 
-        parser.add_argument('-d', '--detail',
-                       action='store',
-                       type=str,
-                       required=False,
-                       help='modifies something')
-        parser.add_argument('commands',
-                       nargs='+',
-                       help="use a command eg. init or start")
+def test_compare_for_payload_size(compare_parser: Compare) -> None:
+    command, result_payload = get_random_command_and_payload()
+    compare = run_command(compare_parser, command)
+    assert len(compare.payload) == 3, "Payload size should be 3"
 
-        self.parser = parser
+def test_compare_for_payload_match(compare_parser: Compare) -> None:
+    command, result_payload = get_random_command_and_payload()
+    compare = run_command(compare_parser, command)
+    assert result_payload == compare.payload, "Payloads should match"
 
-        def run_command(command: argparse.Namespace):
-            args = command
-            options = vars(args)
-            compare = Compare(self.parser, options)
-            return compare
+def test_compare_for_handling_aliases_and_partial_attribute_names(compare_parser: Compare) -> None:
+    command, result_payload = get_random_command_and_payload()
+    compare = run_command(compare_parser, command)
+    for component in compare.payload:
+        for attr in component.items():
+            attr_name, attr_value = attr
+            if attr_name in compare.valid_attribute_types.keys():
+                pass
+            else:
+                for reserved_attr_name in compare.valid_attribute_types.keys():
+                    assert not reserved_attr_name.startswith(attr_name), "Partial or alias reserved attribute names should be detected"
 
-        self.run_command = run_command
-
-    def tearDown(self):
-        pass
-
-    def test_compare_command(self):
-        command = argparse.Namespace(
-            commands=['do', 'argument']
-        )
-        compare = self.run_command(command)
-
-
-if __name__ == '__main__':
-    unittest.main()
+def test_compare_for_interpreting_component_attribute_value_types(compare_parser):
+    command, result_payload = get_random_command_and_payload()
+    compare = run_command(compare_parser, command)
+    for component in compare.payload:
+        for attr in component.items():
+            #print("attr: ", attr)
+            attr_name, attr_value = attr
+            if attr_name not in compare.valid_attribute_types.keys():
+                assert type(attr_value) == float, f"'{attr_name}' is not on list of reserved attrs and is therefore a part with a price of type 'float'"
+            else:
+                attr_type = compare.valid_attribute_types.get(attr_name)
+                if attr_type == 'float':
+                    assert type(attr_value) == float, f"'{attr_name}' should be float"
+                if attr_type == 'string':
+                    assert type(attr_value) == str, f"'{attr_name}' should be str"
