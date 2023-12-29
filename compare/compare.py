@@ -2,6 +2,7 @@
 
 This module contains the main function definitions for the Compare program.
 """
+from decimal import Decimal, ROUND_HALF_UP
 from compare.config import *
 from compare.helpers import *
 
@@ -67,22 +68,30 @@ class Compare():
                 attr_type = self.valid_attribute_types.get(full_attr_name)
 
                 if attr_type:
-                    interpreted_value = self.__interpret_attribute(attr_value, attr_type)
+                    interpreted_value = self.__interpret_attribute(attr_name, attr_value, attr_type)
                     component_dict[full_attr_name] = interpreted_value
                 else:
-                    component_dict[full_attr_name] = float(attr_value)
+                    component_dict[full_attr_name] = self.__interpret_attribute(attr_name, attr_value, Decimal)
 
             self.payload.append(component_dict)
     
-    def __interpret_attribute(self, attr_value, attr_type):
-        if attr_type == 'string':
-            return str(attr_value)
-        elif attr_type == 'integer':
-            return int(attr_value)
-        elif attr_type == 'float':
-            return float(attr_value)
-        else:
-            return attr_value
+    def __interpret_attribute(self, attr_name, attr_value, attr_type):
+        try:
+            if attr_type == 'string':
+                return str(attr_value)
+            elif attr_type == 'integer':
+                return int(attr_value)
+            elif attr_type == 'float':
+                return float(attr_value)
+            elif attr_type == Decimal:
+                return decimal_quantize(attr_value)
+            else:
+                return attr_value
+        except Exception as e:
+            raise self.parser.error(
+                f"Error interpreting attribute: {e}\n"
+                f"Attribute `{attr_name}` value `{attr_value}` cannot be coerced to type: {attr_type}"
+            )
     
     def __handle_alias_or_partial_attr_name(self, attr_name:str) -> str:
         alias_mapping = {
@@ -104,11 +113,11 @@ class Compare():
     def compare_by_price(cls, payload):
         result = []
         for index, component in enumerate(payload):
-            total_price = sum(value for key, value in component.items() if key not in Compare.valid_attribute_types)
+            total_price = sum(Decimal(value) for key, value in component.items() if key not in Compare.valid_attribute_types)
             result.append({
                 "name": component.get("name") or f"Component {index+1}",
                 "description": component.get("description") or "N/A",
-                "total_price": total_price
+                "total_price": decimal_quantize(total_price)
                 })
         return sorted(result, key=lambda x: x["total_price"])
 

@@ -8,6 +8,7 @@ Usage
 import pytest
 import argparse
 from typing import List
+from decimal import Decimal
 
 from compare.config import *
 from compare.helpers import *
@@ -54,7 +55,7 @@ def test_compare_for_interpreting_component_attribute_value_types(compare_parser
         for attr in component.items():
             attr_name, attr_value = attr
             if attr_name not in compare.valid_attribute_types.keys():
-                assert type(attr_value) == float, f"'{attr_name}' is not on list of reserved attrs and is therefore a part with a price of type 'float'"
+                assert type(attr_value) == Decimal, f"'{attr_name}' is not on list of reserved attrs and is therefore a part with a price of type 'float'"
             else:
                 attr_type = compare.valid_attribute_types.get(attr_name)
                 if attr_type == 'float':
