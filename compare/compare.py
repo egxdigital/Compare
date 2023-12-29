@@ -2,7 +2,7 @@
 
 This module contains the main function definitions for the Compare program.
 """
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal
 from compare.config import *
 from compare.helpers import *
 
@@ -109,11 +109,14 @@ class Compare():
         
         return attr_name
     
+    def _print_table(self):
+        pass
+
     @classmethod
     def compare_by_price(cls, payload):
         result = []
         for index, component in enumerate(payload):
-            total_price = sum(Decimal(value) for key, value in component.items() if key not in Compare.valid_attribute_types)
+            total_price = sum_decimal_amounts(Decimal(value) for key, value in component.items() if key not in Compare.valid_attribute_types)
             result.append({
                 "name": component.get("name") or f"Component {index+1}",
                 "description": component.get("description") or "N/A",
