@@ -4,6 +4,7 @@ This module contains the main function definitions for the Compare program.
 """
 from decimal import Decimal
 from compare.config import *
+from compare.functions import *
 from compare.helpers import *
 
 class Compare():
@@ -38,7 +39,7 @@ class Compare():
         self.payload = []
         self.result_payload = []
         self._validate_command()
-        self._validate_and_load_attributes()
+        self._validate_and_load_attributes_and_prepare_payload()
         self.valid_commands[self.command]()
 
     def __repr__(self):
@@ -54,12 +55,15 @@ class Compare():
             f"compare {self.command} for {len(self.options['components'])} components"
         )
 
+    def _tabulate(self):
+        return
+
     def _validate_command(self):
         if self.options['commands'][0] not in self.valid_commands:
             self.parser.error('bad command!')
         self.command=self.options['commands'][0]
 
-    def _validate_and_load_attributes(self):
+    def _validate_and_load_attributes_and_prepare_payload(self):
         for component in self.options['components']:
             component_dict = {}
             for attribute_string in component:
@@ -74,6 +78,8 @@ class Compare():
                     component_dict[full_attr_name] = self.__interpret_attribute(attr_name, attr_value, Decimal)
 
             self.payload.append(component_dict)
+        
+        self.__prepare_payload_for_processing()
     
     def __interpret_attribute(self, attr_name, attr_value, attr_type):
         try:
@@ -109,21 +115,42 @@ class Compare():
         
         return attr_name
     
-    def _print_table(self):
-        pass
+    def __prepare_payload_for_processing(self):
+        self.__run_apply_component_names()
+        #self.__run_apply_total()
 
     @classmethod
     def compare_by_price(cls, payload):
-        result = []
-        for index, component in enumerate(payload):
-            total_price = sum_decimal_amounts(Decimal(value) for key, value in component.items() if key not in Compare.valid_attribute_types)
-            result.append({
-                "name": component.get("name") or f"Component {index+1}",
-                "description": component.get("description") or "N/A",
-                "total_price": decimal_quantize(total_price)
-                })
-        return sorted(result, key=lambda x: x["total_price"])
+        payload = Compare._apply_total(payload)
+        result = sorted(payload, key=lambda x: x["total_price"])
+        return result
 
+    @classmethod
+    def compare_by_score(cls, payload, weights):
+        result = score_by_weights(payload, weights)
+        return sorted(result, key=lambda x: x["score"], reverse=True)
+
+    @classmethod
+    def _apply_total(cls, payload):
+        for component in payload:
+            part_prices = [Decimal(value) for key,value in component.items() if key not in Compare.valid_attribute_types]
+            total_price = decimal_quantize(sum_decimal_amounts(part_prices))
+            component['total_price'] = total_price
+        
+        return payload
+        
+    @classmethod
+    def _apply_component_names(cls, payload):
+        for index, component in enumerate(payload):
+            component['name'] = component.get('name') or f"Component {index+1}"
+        return payload
+    
     def _run_price_comparison(self):
         self.result_payload = self.compare_by_price(self.payload)
         return self.result_payload
+    
+    def __run_apply_total(self):
+        self._apply_total(self.payload)
+
+    def __run_apply_component_names(self):
+        self._apply_component_names(self.payload)

@@ -14,7 +14,7 @@ from compare.config import *
 from compare.helpers import *
 from compare.compare import Compare
 from compare.arg_parser import create_parser
-from tests.test_helpers import get_typical_command_and_payload, get_typical_payload_and_price_comparison_result, get_typical_command_and_price_comparison_result
+from tests.utils.helpers import get_typical_command_and_payload, get_typical_payload_and_price_comparison_result, get_typical_payload_with_weights_and_score_comparison_result
 
 @pytest.fixture
 def compare_parser():
@@ -32,9 +32,10 @@ def test_compare_for_payload_size(compare_parser: argparse.ArgumentParser) -> No
     assert len(compare.payload) == 3, "Payload size should be 3"
 
 def test_compare_for_payload_match(compare_parser: argparse.ArgumentParser) -> None:
-    command, result_payload = get_typical_command_and_payload()
+    command, expected_result = get_typical_command_and_payload()
     compare = run_command(compare_parser, command)
-    assert result_payload == compare.payload, "Payloads should match"
+    result = compare.payload
+    assert result == expected_result, "Payloads should match"
 
 def test_compare_for_handling_aliases_and_partial_attribute_names(compare_parser: argparse.ArgumentParser) -> None:
     command, result_payload = get_typical_command_and_payload()
@@ -66,9 +67,16 @@ def test_compare_for_interpreting_component_attribute_value_types(compare_parser
 def test_class_method_compare_by_price() -> None:
     payload, expected_result = get_typical_payload_and_price_comparison_result()
     result = Compare.compare_by_price(payload)
-    assert expected_result == result, "Should return a list of components sorted in ascending order by price"
+    assert result == expected_result, "Should return a list of components sorted in ascending order by total_price"
 
 def test_instance_method_run_price_comparison(compare_parser: argparse.ArgumentParser) -> None:
-    command, expected_result = get_typical_command_and_price_comparison_result()
+    command, unsorted_result = get_typical_command_and_payload()
+    expected_result = sorted(unsorted_result, key=lambda x : x['total_price'])
     compare = run_command(compare_parser, command)
-    assert expected_result == compare.result_payload
+    result = compare.result_payload
+    assert result == expected_result, "Should return a list of components sorted in ascending order by price"
+
+def test_class_method_compare_by_score() -> None:
+    payload, weights, expected_result = get_typical_payload_with_weights_and_score_comparison_result()
+    result = Compare.compare_by_score(payload, weights)
+    assert result == expected_result, "Should return a list of components sorted in ascending order by score"
